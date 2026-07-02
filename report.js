@@ -1,3 +1,5 @@
+(function(){
+  if (!document.getElementById('btnAnalyze')) return;  /* 사주 리포트 페이지가 아니면 아무 것도 하지 않음 */
 /* ══════════════════════════════════════════════════
    1. 기초 데이터
    ══════════════════════════════════════════════════ */
@@ -774,3 +776,4 @@ $('#btnAnalyze').addEventListener('click', () => {
   rep.scrollIntoView({behavior:'smooth'});
   setTimeout(() => document.querySelectorAll('.fill').forEach(f => f.style.width = f.dataset.w + '%'), 300);
 });
+})();
