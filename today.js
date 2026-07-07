@@ -497,6 +497,13 @@ $('#tSegCal').addEventListener('click', e => {
   $('#tLeapRow').style.display = calType === 'lunar' ? 'flex' : 'none';
 });
 
+let genderType = 'male'; // 'male' | 'female' — 현재는 표시 목적이며 점수 계산에는 영향 없음
+$('#tSegGender').addEventListener('click', e => {
+  if(e.target.tagName !== 'BUTTON') return;
+  ROOT.querySelectorAll('#tSegGender button').forEach(b => b.classList.remove('on'));
+  e.target.classList.add('on'); genderType = e.target.dataset.v;
+});
+
 const WEEK = ['일','월','화','수','목','금','토'];
 function dateLabel(d){ return `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일 (${WEEK[d.getDay()]})`; }
 $('#tTodayDate').textContent = dateLabel(new Date());
@@ -525,7 +532,7 @@ function runToday(profile){
   $('#tProfileForm').style.display = 'none';
   $('#tProfileChip').style.display = 'flex';
   $('#tpName').textContent = `${p.name || '방문자'} 님의 오늘`;
-  $('#tpBirth').textContent = `${p.cal==='lunar'?'음력 ':''}${p.y}.${String(p.m).padStart(2,'0')}.${String(p.d).padStart(2,'0')} · ${p.hour>=0 ? HOUR_NAMES[p.hour/2].split(' ')[0]+'생' : '시간 미상'} · 일간 ${GANH[user.dGan]}(${GAN[user.dGan]}${GAN_EL[user.dGan]})${p.mbti!=='unknown' ? ' · '+p.mbti : ''}`;
+  $('#tpBirth').textContent = `${p.cal==='lunar'?'음력 ':''}${p.y}.${String(p.m).padStart(2,'0')}.${String(p.d).padStart(2,'0')} · ${p.hour>=0 ? HOUR_NAMES[p.hour/2].split(' ')[0]+'생' : '시간 미상'}${p.gender==='male' ? ' · 남' : p.gender==='female' ? ' · 여' : ''} · 일간 ${GANH[user.dGan]}(${GAN[user.dGan]}${GAN_EL[user.dGan]})${p.mbti!=='unknown' ? ' · '+p.mbti : ''}`;
 
   /* CH1 일력 카드 */
   $('#ilDate').textContent = dateLabel(now);
@@ -670,7 +677,8 @@ $('#btnToday').addEventListener('click', () => {
     name: $('#tName').value.trim(),
     cal: calType, leap: $('#tLeap').checked,
     y: parsed.y, m: parsed.m, d: parsed.d,
-    hour: +hourSel.value, mbti: mbtiSel.value
+    hour: +hourSel.value, mbti: mbtiSel.value,
+    gender: genderType
   };
   saveProfile(profile);
   runToday(profile);
@@ -686,6 +694,8 @@ $('#btnEditProfile').addEventListener('click', () => {
     ROOT.querySelectorAll('#tSegCal button').forEach(b => b.classList.toggle('on', b.dataset.v === p.cal));
     $('#tLeapRow').style.display = p.cal === 'lunar' ? 'flex' : 'none';
     $('#tLeap').checked = !!p.leap;
+    genderType = p.gender || 'male';
+    ROOT.querySelectorAll('#tSegGender button').forEach(b => b.classList.toggle('on', b.dataset.v === genderType));
   }
   $('#tProfileChip').style.display = 'none';
   $('#tProfileForm').style.display = 'block';
