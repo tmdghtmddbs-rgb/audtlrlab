@@ -703,6 +703,24 @@ $('#btnEditProfile').addEventListener('click', () => {
   $('#tProfileForm').scrollIntoView({behavior:'smooth', block:'start'});
 });
 
+$('#btnResetProfile').addEventListener('click', () => {
+  if(!confirm('저장된 명식 정보를 지우고 처음 화면으로 돌아갈까요?')) return;
+  try{ localStorage.removeItem('mslab_profile'); }catch(e){}
+  $('#tName').value = '';
+  birthInput.value = '';
+  hourSel.value = -1; mbtiSel.value = 'unknown';
+  calType = 'solar';
+  ROOT.querySelectorAll('#tSegCal button').forEach(b => b.classList.toggle('on', b.dataset.v === 'solar'));
+  $('#tLeapRow').style.display = 'none';
+  $('#tLeap').checked = false;
+  genderType = 'male';
+  ROOT.querySelectorAll('#tSegGender button').forEach(b => b.classList.toggle('on', b.dataset.v === 'male'));
+  $('#tProfileChip').style.display = 'none';
+  $('#tProfileForm').style.display = 'block';
+  $('#tReport').style.display = 'none';
+  $('#tProfileForm').scrollIntoView({behavior:'smooth', block:'start'});
+});
+
 /* 공유 */
 $('#btnTShare').addEventListener('click', async () => {
   const shareData = {
