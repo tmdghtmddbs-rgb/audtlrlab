@@ -294,6 +294,19 @@ Object.keys(MBTI_DESC).forEach(t => mbtiSel.add(new Option(t, t)));
 
 let gender = '남';
 let calType = 'solar';
+let lastShareUrl = '';
+function buildShareUrl(){
+  const params = new URLSearchParams();
+  params.set('b', birthInput.value);
+  params.set('c', calType);
+  if(calType === 'lunar' && $('#inLeap').checked) params.set('l', '1');
+  params.set('h', hourSel.value);
+  params.set('g', gender);
+  params.set('m', mbtiSel.value);
+  const nm = $('#inName').value.trim();
+  if(nm) params.set('n', nm);
+  return location.href.split('?')[0].split('#')[0] + '?' + params.toString();
+}
 $('#segGender').addEventListener('click', e => {
   if(e.target.tagName !== 'BUTTON') return;
   document.querySelectorAll('#segGender button').forEach(b => b.classList.remove('on'));
@@ -329,14 +342,15 @@ $('#btnKakaoStart').addEventListener('click', () => {
   document.querySelector('#form-section .field').scrollIntoView({behavior:'smooth', block:'center'});
 });
 
-/* ── 무료 분석 공유하기 ── */
+/* ── 분석 결과 공유하기 ── */
 $('#btnShare').addEventListener('click', async () => {
   const nameEl = $('#rName');
   const who = (nameEl && nameEl.textContent && nameEl.textContent !== '—') ? nameEl.textContent : '내';
+  const shareUrl = lastShareUrl || location.href.split('?')[0].split('#')[0];
   const shareData = {
     title: '명식LAB — 사주 × MBTI 무료 정밀 리포트',
     text: `${who} 사주를 무료로 세워봤는데 신기하더라 — 너도 무료로 열어봐!`,
-    url: location.href.split('#')[0]
+    url: shareUrl
   };
   if(navigator.share){
     try{ await navigator.share(shareData); }
@@ -401,6 +415,7 @@ $('#btnAnalyze').addEventListener('click', () => {
   const parsed = parseBirthInput();
   if(parsed.err){ alert(parsed.err); birthInput.style.borderColor = 'var(--cinnabar)'; birthInput.focus(); return; }
   birthInput.style.borderColor = '';
+  lastShareUrl = buildShareUrl();
   let y = parsed.y, m = parsed.m, d = parsed.d;
   const h = +hourSel.value;
   let birthLine = '';
@@ -805,4 +820,31 @@ $('#btnAnalyze').addEventListener('click', () => {
   rep.scrollIntoView({behavior:'smooth'});
   setTimeout(() => document.querySelectorAll('.fill').forEach(f => f.style.width = f.dataset.w + '%'), 300);
 });
+
+/* ── 공유된 링크로 들어온 경우 자동으로 같은 결과 재현 ── */
+(function autoLoadFromShare(){
+  const params = new URLSearchParams(location.search);
+  if(!params.has('b')) return;
+  const b = params.get('b');
+  const c = params.get('c') || 'solar';
+  const l = params.get('l') === '1';
+  const h = params.get('h');
+  const g = params.get('g');
+  const m = params.get('m');
+  const n = params.get('n');
+  if(n) $('#inName').value = n;
+  if(b) birthInput.value = b;
+  if(h !== null) hourSel.value = h;
+  if(m) mbtiSel.value = m;
+  if(c === 'lunar'){
+    const lunarBtn = document.querySelector('#segCal [data-v="lunar"]');
+    if(lunarBtn) lunarBtn.click();
+    if(l) $('#inLeap').checked = true;
+  }
+  if(g === '여'){
+    const femaleBtn = document.querySelector('#segGender [data-v="여"]');
+    if(femaleBtn) femaleBtn.click();
+  }
+  setTimeout(() => { const btn = $('#btnAnalyze'); if(btn) btn.click(); }, 50);
+})();
 })();
