@@ -297,14 +297,14 @@ let calType = 'solar';
 let lastShareUrl = '';
 function buildShareUrl(){
   const params = new URLSearchParams();
-  params.set('b', birthInput.value);
-  params.set('c', calType);
-  if(calType === 'lunar' && $('#inLeap').checked) params.set('l', '1');
-  params.set('h', hourSel.value);
-  params.set('g', gender);
-  params.set('m', mbtiSel.value);
+  params.set('sjb', birthInput.value);
+  params.set('sjc', calType);
+  if(calType === 'lunar' && $('#inLeap').checked) params.set('sjl', '1');
+  params.set('sjh', hourSel.value);
+  params.set('sjg', gender);
+  params.set('sjm', mbtiSel.value);
   const nm = $('#inName').value.trim();
-  if(nm) params.set('n', nm);
+  if(nm) params.set('sjn', nm);
   return location.href.split('?')[0].split('#')[0] + '?' + params.toString();
 }
 $('#segGender').addEventListener('click', e => {
@@ -824,14 +824,14 @@ $('#btnAnalyze').addEventListener('click', () => {
 /* ── 공유된 링크로 들어온 경우 자동으로 같은 결과 재현 ── */
 (function autoLoadFromShare(){
   const params = new URLSearchParams(location.search);
-  if(!params.has('b')) return;
-  const b = params.get('b');
-  const c = params.get('c') || 'solar';
-  const l = params.get('l') === '1';
-  const h = params.get('h');
-  const g = params.get('g');
-  const m = params.get('m');
-  const n = params.get('n');
+  if(!params.has('sjb')) return;
+  const b = params.get('sjb');
+  const c = params.get('sjc') || 'solar';
+  const l = params.get('sjl') === '1';
+  const h = params.get('sjh');
+  const g = params.get('sjg');
+  const m = params.get('sjm');
+  const n = params.get('sjn');
   if(n) $('#inName').value = n;
   if(b) birthInput.value = b;
   if(h !== null) hourSel.value = h;
