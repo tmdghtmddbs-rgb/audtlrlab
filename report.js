@@ -287,6 +287,7 @@ birthInput.addEventListener('input', () => {
   birthInput.value = birthInput.value.replace(/\D/g, '').slice(0, 8);
 });
 const HOUR_NAMES = ['자시 (23:30~01:29)','축시 (01:30~03:29)','인시 (03:30~05:29)','묘시 (05:30~07:29)','진시 (07:30~09:29)','사시 (09:30~11:29)','오시 (11:30~13:29)','미시 (13:30~15:29)','신시 (15:30~17:29)','유시 (17:30~19:29)','술시 (19:30~21:29)','해시 (21:30~23:29)'];
+hourSel.add(new Option('시간을 모릅니다', '-1'));
 HOUR_NAMES.forEach((n,i) => hourSel.add(new Option(n, i*2)));
 mbtiSel.add(new Option('모릅니다 (사주만 볼게요)', 'unknown'));
 Object.keys(MBTI_DESC).forEach(t => mbtiSel.add(new Option(t, t)));
@@ -350,6 +351,28 @@ $('#btnShare').addEventListener('click', async () => {
   }
 });
 
+/* 로그인 여부에 따라 CHAPTER 6부터 내용 잠금 — 제목은 노출, 본문만 잠금 */
+function applyLoginGate(){
+  const loggedIn = typeof MEMBER_UID !== 'undefined' && MEMBER_UID;
+  const lockedIds = ['chPersona','chInner','chMoney','chDaeun','chSpouse','chSinsal'];
+  lockedIds.forEach(id => {
+    const sec = document.getElementById(id);
+    if(!sec) return;
+    const already = sec.querySelector('.locked-note');
+    if(loggedIn){
+      if(already) already.remove();
+      sec.classList.remove('is-locked');
+      return;
+    }
+    sec.classList.add('is-locked');
+    if(already) return; /* 이미 잠금 표시가 있으면 중복으로 또 안 붙임 */
+    const lock = document.createElement('div');
+    lock.className = 'note locked-note';
+    lock.innerHTML = `<b>🔒 로그인하면 계속 볼 수 있어요</b><br>이 챕터부터는 로그인한 회원에게만 공개돼요. 화면 우측 상단 로그인 버튼으로 3초면 시작할 수 있어요(카카오톡 간편로그인 포함).`;
+    sec.appendChild(lock);
+  });
+}
+
 function parseBirthInput(){
   const raw = birthInput.value.trim();
   if(!/^\d{8}$/.test(raw)) return {err:'생년월일 8자리를 숫자로만 입력해줘 (예: 19970602)'};
@@ -371,6 +394,9 @@ $('#btnAnalyze').addEventListener('click', () => {
   const mbti = mbtiSel.value;
   if(!mbti){ mbtiSel.style.borderColor = 'var(--cinnabar)'; mbtiSel.focus(); return; }
   const hasMbti = mbti !== 'unknown';
+
+  if(hourSel.value === ''){ hourSel.style.borderColor = 'var(--cinnabar)'; hourSel.focus(); return; }
+  hourSel.style.borderColor = '';
 
   const parsed = parseBirthInput();
   if(parsed.err){ alert(parsed.err); birthInput.style.borderColor = 'var(--cinnabar)'; birthInput.focus(); return; }
@@ -763,6 +789,9 @@ $('#btnAnalyze').addEventListener('click', () => {
   if(cyGroup === '재성') mTiming += ` 참고로 올해(${cyGanji}년)가 바로 재성이 들어온 해야. 미루던 돈 공부, 올해 시작해.`;
   $('#mHead').textContent = mHead;
   $('#mBody').innerHTML = [mType, mShin, mTiming].map(p => `<p>${p}</p>`).join('');
+
+  /* 로그인 여부에 따른 챕터 잠금 (CHAPTER 6부터) — 아임웹은 로그인 상태를 전역 변수 MEMBER_UID로 노출함 */
+  applyLoginGate();
 
   /* 표시 & 챕터 번호 재정렬 */
   const rep = $('#report');
