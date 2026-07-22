@@ -328,18 +328,20 @@ function bar(name, cls, cnt, total){
   <span class="cnt">${cnt}</span></div>`;
 }
 
-/* ── "카카오로 3초 시작하기" 버튼 ──────────────────────────
-   아임웹에서는 카카오 로그인/카카오싱크(채널 자동추가)를
-   [환경설정 > 소셜 로그인·지도·API]에서 코드 없이 설정합니다.
-   이 버튼에 별도 Kakao SDK를 붙이지 마세요 — 아임웹 자체 회원 시스템과
-   분리되어 실제 가입·채널추가 기록이 남지 않습니다.
-   실제 구현은 이 버튼 자리에 "아임웹 회원가입/로그인 위젯"을 배치하고,
-   그 위젯에서 카카오 로그인을 선택하도록 안내하는 방식을 추천드립니다.
-   (참고: 소셜 로그인은 아임웹 Starter 이상 요금제에서 지원됩니다)
-   지금은 임시로 폼으로 스크롤만 이동시켜 둡니다.
+/* ── "카카오로 3초 시작하기" 버튼 → 아임웹 실제 로그인 링크 클릭을 대신 트리거 ──
+   아임웹 지원팀 확인: 로그인 링크의 클래스는 a.btn.btn-primary.btn_custom.
+   페이지에 이 클래스 조합을 가진 요소가 여러 개면(다른 로그인/가입 버튼 등),
+   아래 LOGIN_LINK_INDEX 값을 0,1,2... 순서로 바꿔가며 맞는 걸 찾아주세요.
 */
+const LOGIN_LINK_INDEX = 0;
 $('#btnKakaoStart').addEventListener('click', () => {
-  document.querySelector('#form-section .field').scrollIntoView({behavior:'smooth', block:'center'});
+  const candidates = document.querySelectorAll('a.btn.btn-primary.btn_custom');
+  const loginLink = candidates[LOGIN_LINK_INDEX];
+  if(loginLink){
+    loginLink.click();
+  } else {
+    alert('로그인 버튼을 찾지 못했어요. 화면 우측 상단의 로그인 버튼을 직접 눌러줘.');
+  }
 });
 
 /* ── 분석 결과 공유하기 ── */
@@ -847,4 +849,15 @@ $('#btnAnalyze').addEventListener('click', () => {
   }
   setTimeout(() => { const btn = $('#btnAnalyze'); if(btn) btn.click(); }, 50);
 })();
+
+/* ── 로그인 상태가 바뀌면(모달 로그인 등) 새로고침 없이 그 자리에서 잠금 해제 ── */
+let _wasLoggedIn = typeof MEMBER_UID !== 'undefined' && !!MEMBER_UID;
+setInterval(() => {
+  const nowLoggedIn = typeof MEMBER_UID !== 'undefined' && !!MEMBER_UID;
+  if(nowLoggedIn !== _wasLoggedIn){
+    _wasLoggedIn = nowLoggedIn;
+    const rep = $('#report');
+    if(rep && rep.style.display === 'block') applyLoginGate();
+  }
+}, 1000);
 })();
